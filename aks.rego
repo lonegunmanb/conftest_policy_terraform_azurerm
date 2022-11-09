@@ -45,3 +45,9 @@ deny_ckv_azure_4 [msg] {
     not aks_log_analytics_workspace_on(r.change)
     msg := sprintf("CKV_AZURE_4 %s Azure AKS cluster monitoring is not enabled", [r.address])
 }
+
+deny_ckv_azure_116 [msg] {
+    r := after_resource("azurerm_kubernetes_cluster")
+    r.change.after.azure_policy_enabled != true
+    msg := sprintf("CKV_AZURE_116 %s Ensure AKS policies add-on", [r.address])
+}
