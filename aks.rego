@@ -51,3 +51,18 @@ deny_ckv_azure_116 [msg] {
     r.change.after.azure_policy_enabled != true
     msg := sprintf("CKV_AZURE_116 %s Ensure AKS policies add-on", [r.address])
 }
+
+has_disk_encryption_set(i) = r {
+    disk_encryption_set_id := i.after.disk_encryption_set_id
+    r := regex.match("/subscriptions/.+/resourceGroups/.+/providers/Microsoft.Compute/diskEncryptionSets/.+", disk_encryption_set_id)
+}
+
+has_disk_encryption_set(i) = r {
+    r := i.after_unknown.disk_encryption_set_id == true
+}
+
+deny_ckv_azure_117 [msg] {
+    r := after_resource("azurerm_kubernetes_cluster")
+    not has_disk_encryption_set(r.change)
+    msg := sprintf("CKV_AZURE_117 %s Ensure that AKS uses disk encryption set", [r.address])
+}
